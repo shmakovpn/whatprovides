@@ -1,2 +1,35 @@
-venv/
+# whatprovides/.gitignore
+# author: shmakovpn <shmakovpn@yandex.ru>
+# date: 2020-06-24
+
 .idea/
+venv/
+migrations/
+*.pyc
+
+# some temporary files
+temp.py
+temp.html
+notes
+
+# setuptools
+dist/
+__pycache__/
+*.egg-info/
+.eggs/
+
+# sphinx files
+docs/build/html/
+docs/build/doctrees/
+_build
+_static
+_templates
+
+# django project files
+db.sqlite3
+manage.py
+templates/
+
+# deployment files
+uwsgi.ini
+

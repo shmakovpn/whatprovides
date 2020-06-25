@@ -7,79 +7,107 @@ Author:
 Date:
  2020-06-21
 """
+import os
 import re
 import unittest
 from typing import Pattern, List
-from whatprovides import DeclarationType
+from whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, ifilter_declaration, \
+    re_filter_declaration, FileLine, get_declarations, get_file_lines
+
+
+SCRIPT_PATH: str = os.path.basename(os.path.abspath(__file__))
 
 
 class TestWhatprovides(unittest.TestCase):
-    def setUp(self) -> None:
-        self.declaration_types: List[DeclarationType] = [
-            DeclarationType(
-                name='var',
-                pattern=re.compile(r'^(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s+=[^=]'),
-            ),
-            DeclarationType(
-                name='def',
-                pattern=re.compile(r'^def\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)[\s(]'),
-            ),
-            DeclarationType(
-                name='class',
-                pattern=re.compile(r'^class\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)[\s:(]'),
-            ),
-        ]
-
     def test_declaration_type_init(self):
         try:
-            self.declaration_types.append(
+            declaration_types.append(
                 DeclarationType(
                     name='wrong_pattern',
-                    pattern=re.compile(r'^pattern withot the "name" group')
+                    pattern=re.compile(r'^pattern without the "name" group')
                 )
             )
             self.assertTrue(False, f"Checking for wrong pattern failed")
         except RuntimeError as e:
             print(f"Checker for wrong pattern works! '{e}' was caught")
         line_var: str = 'some_var = "some value"'
-        self.assertEqual(self.declaration_types[0].search(line=line_var), 'some_var')
+        self.assertEqual(declaration_types[0].search(line=line_var), 'some_var')
 
     def test_declaration_type_search(self):
-        #todo
+        line_var: str = 'variable_name = "variable value"'
+        variable_name: str = declaration_types[0].search(line=line_var)
+        self.assertEqual(variable_name, 'variable_name')
+        line_def: str = 'def function_name(*args, **kwargs):'
+        function_name: str = declaration_types[1].search(line=line_def)
+        self.assertEqual(function_name, 'function_name')
+        line_class: str = 'class ClassName(ParentClass):'
+        class_name: str = declaration_types[2].search(line=line_class)
+        self.assertEqual(class_name, 'ClassName')
 
-#     def test_a(self):
-#         def countdown_gen(n):
-#             x = n
-#             while x > 0:
-#                 yield x
-#                 x -= 1
-#
-#         print(type(countdown_gen(4)))
-#         print(list(countdown_gen(4)))
-#
-#     def test_list(self):
-#         class A:
-#             some_list = []
-#
-#         a1 = A()
-#         print(f"a1.some_list={a1.some_list}, {id(a1.some_list)}")
-#         a2 = A()
-#         print(f"a2.some_list={a2.some_list} {id(a2.some_list)}")
-#         a1.some_list.append('hello')
-#         print(f"a1.some_list={a1.some_list}, {id(a1.some_list)}")
-#         print(f"a2.some_list={a2.some_list} {id(a2.some_list)}")
-#
-#     def test_search(self):
-#         line = 'def some_func(arg1, arg2):'
-#         pattern_var: Pattern = re.compile(r'^(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s+=[^=]')
-#         pattern_def: Pattern = re.compile(r'^def\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)[\s(]')
-#         pattern_class: Pattern = re.compile(r'^class\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)[\s:(]')
-#         print(pattern_def.search(line).groups())
-#         print(pattern_def.search(line).groupdict())
-#         pattern_nogroups: Pattern = re.compile(r'def some')
-#         if pattern_nogroups.search(line).groups():
-#             print('() is not None')  # this must never exec
-#         print(f"self.__class__.__name__={self.__class__.__name__}")
-#         print(f"pattern_var.groups={pattern_var.groups}")
-#         print(f"pattern_var.groupindex={pattern_var.groupindex}")
-#         if 'name' in pattern_var.groupindex:
+    def test_filter_declaration(self):
+        declarations: List[Declaration] = [
+            Declaration(declaration_type=declaration_types[0], name='filtered', module_path=''),
+            Declaration(declaration_type=declaration_types[0], name='not_filtered', module_path=''),
+        ]
+        filtered_declarations: List[Declaration] = list(
+            filter_declaration(search='not', declarations=declarations)
+        )
+        self.assertEqual(len(filtered_declarations), 1)
+        self.assertEqual(filtered_declarations[0].name, 'not_filtered')
+
+    def test_ifilter_declaration(self):
+        declarations: List[Declaration] = [
+            Declaration(declaration_type=declaration_types[0], name='filtered', module_path=''),
+            Declaration(declaration_type=declaration_types[0], name='NOT_filtered', module_path=''),
+        ]
+        filtered_declarations: List[Declaration] = list(
+            ifilter_declaration(search='Not', declarations=declarations)
+        )
+        self.assertEqual(len(filtered_declarations), 1)
+        self.assertEqual(filtered_declarations[0].name, 'NOT_filtered')
+
+    def test_re_filter_declaration(self):
+        declarations: List[Declaration] = [
+            Declaration(declaration_type=declaration_types[0], name='filtered', module_path=''),
+            Declaration(declaration_type=declaration_types[0], name='not_filtered_123', module_path=''),
+        ]
+        filter_declarations: List[Declaration] = list(
+            re_filter_declaration(search=re.compile(r'not_[a-zA-Z0-9_]+'), declarations=declarations)
+        )
+        self.assertEqual(len(filter_declarations), 1)
+        self.assertEqual(filter_declarations[0].name, 'not_filtered_123')
+
+    def test_get_declarations(self):
+        lines: List[FileLine] = [
+            FileLine(file_path='', line_number=1, line='# some comment'),
+            FileLine(file_path='', line_number=1, line='variable = "value"'),
+            FileLine(file_path='', line_number=1, line='def some_function(*args, **kwargs):'),
+            FileLine(file_path='', line_number=1, line='class SomeClass(ParentClass):'),
+            FileLine(file_path='', line_number=1, line='x==1'),
+            FileLine(file_path='', line_number=1, line='# def filtered_function():'),
+            FileLine(file_path='', line_number=1, line='    class Meta:'),
+        ]
+        declarations: List[Declaration] = list(
+            get_declarations(lines=lines)
+        )
+        self.assertEqual(len(declarations), 3)
+        self.assertEqual(declarations[0].name, 'variable')
+        self.assertEqual(declarations[0].declaration_type, declaration_types[0])
+        self.assertEqual(declarations[1].name, 'some_function')
+        self.assertEqual(declarations[1].declaration_type, declaration_types[1])
+        self.assertEqual(declarations[2].name, 'SomeClass')
+        self.assertEqual(declarations[2].declaration_type, declaration_types[2])
+
+    def test_get_file_lines(self):
+        test_path: str = os.path.join(SCRIPT_PATH, 'test')
+        file_paths: List[str] = [
+            os.path.join(test_path, 'test_data1.py'),
+            os.path.join(test_path, 'test_data2.py'),
+        ]
+        file_lines: List[FileLine] = list(
+            get_file_lines(file_paths=file_paths)
+        )
+        self.assertEqual(len(file_lines), 9)
+
+
+
