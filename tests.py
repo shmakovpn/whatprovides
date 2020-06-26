@@ -12,10 +12,11 @@ import re
 import unittest
 from typing import Pattern, List
 from whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, ifilter_declaration, \
-    re_filter_declaration, FileLine, get_declarations, get_file_lines
+    re_filter_declaration, FileLine, get_declarations, get_file_lines, get_python_files, get_paths, \
+    filter_delaration_type
 
 
-SCRIPT_PATH: str = os.path.basename(os.path.abspath(__file__))
+SCRIPT_PATH: str = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestWhatprovides(unittest.TestCase):
@@ -107,7 +108,55 @@ class TestWhatprovides(unittest.TestCase):
         file_lines: List[FileLine] = list(
             get_file_lines(file_paths=file_paths)
         )
-        self.assertEqual(len(file_lines), 9)
+        self.assertEqual(len(file_lines), 7)
+        self.assertEqual(file_lines[0].line_number, 0)
+        self.assertEqual(file_lines[0].file_path, file_paths[0])
+        self.assertEqual(file_lines[0].line, "variable1 = 'value1'\n")
 
+    def test_get_python_files(self):
+        test_path: str = os.path.join(SCRIPT_PATH, 'test')
+        file_paths: List[str] = list(
+            get_python_files([test_path])
+        )
+        sub_folder_path: str = os.path.join(test_path, 'sub_folder')
+        sub_sub_folder_path: str = os.path.join(sub_folder_path, 'sub_sub_folder')
+        sub_folder2_path: str = os.path.join(test_path, 'sub_folder2')
+        sub_sub_folder2_path: str = os.path.join(sub_folder2_path, 'sub_sub_folder2')
+        self.assertIn(os.path.join(sub_folder_path, 'sub_folder_item.py'), file_paths)
+        self.assertIn(os.path.join(sub_sub_folder_path, 'sub_sub_folder_item.py'), file_paths)
+        self.assertIn(os.path.join(sub_sub_folder2_path, 'sub_sub_folder2_item.py'), file_paths)
+        self.assertNotIn(os.path.join(sub_folder_path, 'not_item.txt'), file_paths)
+
+    def test_get_paths(self):
+        test_path: str = os.path.join(SCRIPT_PATH, 'test')
+        paths: List[str] = [
+            os.path.join(test_path, 'sub_folder'),
+            os.path.join(test_path, 'sub_folder2'),
+            os.path.join(test_path, 'not_folder.txt'),
+        ]
+        python_paths: List[str] = list(
+            get_paths(paths)
+        )
+        self.assertEqual(len(python_paths), 2)
+        self.assertEqual(python_paths[0], paths[0])
+        self.assertEqual(python_paths[1], paths[1])
+
+    def test_declaration_types_in(self):
+        some_type: DeclarationType = declaration_types[1]
+        self.assertIn(some_type, declaration_types)
+
+    def test_filter_declaration_type(self):
+        declarations: List[Declaration] = [
+            Declaration(declaration_type=declaration_types[0], name='filtered', module_path=''),
+            Declaration(declaration_type=declaration_types[1], name='not_filtered_123', module_path=''),
+        ]
+        not_filtered: List[Declaration] = list(
+            filter_delaration_type(declarations=declarations)
+        )
+        self.assertEqual(len(not_filtered), 2)
+        filtered: List[Declaration] = list(
+            filter_delaration_type(declarations=declarations, remained_types=[declaration_types[1]])
+        )
+        self.assertEqual(len(filtered), 1)
 
 

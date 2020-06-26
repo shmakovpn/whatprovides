@@ -17,7 +17,9 @@ Date:
 import os
 import sys
 import re
-from typing import List, Pattern, Match, Iterator, Generator
+import argparse
+from typing import List, Pattern, Match, Iterator, Optional
+from functools import partial
 
 
 class DeclarationType:
@@ -97,8 +99,11 @@ class Declaration:
         self.name = name
         self.module_path = module_path
 
+    def __str__(self) -> str:
+        return '%s: %s: %s' % (self.declaration_type.name, self.name, self.module_path)
 
-def filter_declaration(search: str, declarations: Iterator[Declaration], ) -> Generator[Declaration]:
+
+def filter_declaration(search: str, declarations: Iterator[Declaration], ) -> Iterator[Declaration]:
     """
     This generator will filter declarations by name of declaration
     case sensitive
@@ -108,14 +113,14 @@ def filter_declaration(search: str, declarations: Iterator[Declaration], ) -> Ge
     :param declarations: An iterable of declarations
     :type declarations: Iterator[Declaration]
     :return: generator of filtered declarations
-    :rtype: Generator[Declaration]
+    :rtype: Iterator[Declaration]
     """
     for declaration in declarations:
         if search in declaration.name:
             yield declaration
 
 
-def ifilter_declaration(search: str, declarations: Iterator[Declaration], ) -> Generator[Declaration]:
+def ifilter_declaration(search: str, declarations: Iterator[Declaration], ) -> Iterator[Declaration]:
     """
     This generator will filter declarations by name of declaration
     case insensitive
@@ -124,7 +129,7 @@ def ifilter_declaration(search: str, declarations: Iterator[Declaration], ) -> G
     :param declarations: An iterable of declarations
     :type declarations: Iterator[Declaration]
     :return: generator of filtered declarations
-    :rtype: Generator[Declaration]
+    :rtype: Iterator[Declaration]
     """
     search_lower: str = search.lower()
     for declaration in declarations:
@@ -132,7 +137,7 @@ def ifilter_declaration(search: str, declarations: Iterator[Declaration], ) -> G
             yield declaration
 
 
-def re_filter_declaration(search: Pattern, declarations: Iterator[Declaration], ) -> Generator[Declaration]:
+def re_filter_declaration(search: Pattern, declarations: Iterator[Declaration], ) -> Iterator[Declaration]:
     """
     This generator will filter declarations by name if declaration
     using the compiled regular expression
@@ -141,7 +146,7 @@ def re_filter_declaration(search: Pattern, declarations: Iterator[Declaration], 
     :param declarations: An iterable of declarations
     :type declarations: Iterator[Declaration]
     :return: generator of filtered declarations
-    :rtype: Generator[Declaration]
+    :rtype: Iterator[Declaration]
     """
     for declaration in declarations:
         if search.search(declaration.name):
@@ -159,13 +164,17 @@ class FileLine:
     :param line: a content of this line
     :type line: str
     """
+
     def __init__(self, file_path: str, line_number: int, line: str):
         self.file_path: str = file_path
         self.line_number: int = line_number
         self.line: str = line
 
+    def __str__(self):
+        return '%i: %s: %s' % (self.line_number, self.file_path, self.line.rstrip())
 
-def get_declarations(lines: Iterator[FileLine]) -> Generator[Declaration]:
+
+def get_declarations(lines: Iterator[FileLine]) -> Iterator[Declaration]:
     """
     This generator creates instances of declaration
     from lines of code which contains declaration of variables or functions or classes
@@ -173,7 +182,7 @@ def get_declarations(lines: Iterator[FileLine]) -> Generator[Declaration]:
     :param lines: an iterable of lines of code
     :type lines: Iterator[FileLine]
     :return: a generator of instances of declaration
-    :rtype: Generator[Declaration]
+    :rtype: Iterator[Declaration]
     """
     for line in lines:
         for declaration_type in declaration_types:
@@ -187,7 +196,7 @@ def get_declarations(lines: Iterator[FileLine]) -> Generator[Declaration]:
                 break
 
 
-def get_file_lines(file_paths: Iterator[str]) -> Generator[FileLine]:
+def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
     """
     This generator creates instances of a line of a file
     from paths to files
@@ -195,7 +204,7 @@ def get_file_lines(file_paths: Iterator[str]) -> Generator[FileLine]:
     :param file_paths: An iterable of file paths
     :type file_paths: Iterator[str]
     :return: a generator of instances of lines of files
-    :rtype: Generator[FileLine]
+    :rtype: Iterator[FileLine]
     """
     for file_path in file_paths:
         with open(file_path, 'r') as file:
@@ -208,3 +217,107 @@ def get_file_lines(file_paths: Iterator[str]) -> Generator[FileLine]:
                 )
                 line_number += 1
 
+
+def get_python_files(search_paths: Iterator[str]) -> Iterator[str]:
+    """
+    This generator yields paths of python files from search paths
+
+    :param search_paths: An iterable of search paths
+    :type search_paths: Iterator[str]
+    :return: a generator of paths of python files
+    :rtype: Iterator[str]
+    """
+    for search_path in search_paths:
+        for item in os.listdir(search_path):
+            if item.lower() == '__pychache__':
+                continue
+            item_path: str = os.path.join(search_path, item)
+            if os.path.isfile(item_path):
+                if item.lower().endswith('.py'):
+                    yield item_path
+            elif os.path.isdir(item_path):
+                for sub_item_path in get_python_files([item_path]):
+                    yield sub_item_path
+
+
+def get_paths(paths: Iterator[str]) -> Iterator[str]:
+    """
+    This generator filters an iterable of paths,
+    remaining only python libraries folders paths
+
+    :param paths: An iterable of paths
+    :type paths: Iterator[str]
+    :return: a generator of paths of python libraries folders
+    :rtype: Iterator[str]
+    """
+    for path in paths:
+        if os.path.isdir(path):
+            yield path
+
+
+def filter_delaration_type(
+        declarations: Iterator[Declaration],
+        remained_types: Optional[List[DeclarationType]] = None,
+) -> Iterator[Declaration]:
+    """
+    This generator filters instances of Declaration by a list of declaration types
+
+    :param declarations: an iterable of Declarations to filter
+    :type declarations: Iterator[Declarations]
+    :param remained_types: only declarations of type from this list will remain. None - no filtering (default).
+    :type remained_types: Optional[List[DeclarationType]]
+    :return: filtered declarations
+    :rtype: Iterator[Declarations]
+    """
+    for declaration in declarations:
+        if not remained_types:
+            yield declaration
+        elif declaration.declaration_type in remained_types:
+            yield declaration
+
+
+if __name__ == '__main__':
+    parser: argparse.ArgumentParser = argparse.ArgumentParser()
+    parser.add_argument('-r', help='enables search using a regex pattern', action='store_true')
+    parser.add_argument('-i', help='ignore case', action='store_true')
+    parser.add_argument('search', help='a regex pattern (if using -r) or string to search for')
+    parser.add_argument('-v', help='show only variables, this option can be combined with the -c or -d options',
+                        action='store_true')
+    parser.add_argument('-c', help='show only classes, this option can be combined with the -v or -d options',
+                        action='store_true')
+    parser.add_argument('-d', help='show only functions, this option can be combined with the -v or -c options',
+                        action='store_true')
+    args: argparse.Namespace = parser.parse_args()
+    print(f"args={args}")
+    if args.r and args.i:
+        _filter: partial = partial(re_filter_declaration, re.compile(args.search, re.IGNORECASE))
+    elif args.r:
+        _filter: partial = partial(re_filter_declaration, re.compile(args.search))
+    elif args.i:
+        _filter: partial = partial(ifilter_declaration, args.search)
+    else:
+        _filter: partial = partial(filter_declaration, args.search)
+    results: Iterator[Declaration] = _filter(
+        declarations=get_declarations(
+            lines=get_file_lines(
+                file_paths=get_python_files(
+                    search_paths=get_paths(sys.path)
+                )
+            )
+        )
+    )
+    if not args.v and not args.d and not args.c:
+        filtered_results: Iterator[Declaration] = results
+    elif args.v and args.d and args.c:
+        filtered_results: Iterator[Declaration] = results
+    else:
+        remained_types: List[DeclarationType] = []
+        if args.v:
+            remained_types.append(declaration_types[0])
+        if args.d:
+            remained_types.append(declaration_types[1])
+        if args.c:
+            remained_types.append(declaration_types[2])
+        filtered_results: Iterator[Declaration] = filter_delaration_type(results, remained_types=remained_types)
+    for result in filtered_results:
+        print(result)

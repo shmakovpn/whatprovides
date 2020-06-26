@@ -6,10 +6,14 @@
 Welcome to whatprovides's documentation!
 ========================================
 
+.. include:: introduction.rst
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+   installation
+   examples
 
 
 Indices and tables
