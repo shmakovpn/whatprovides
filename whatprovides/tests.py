@@ -11,7 +11,7 @@ import os
 import re
 import unittest
 from typing import Pattern, List
-from whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, ifilter_declaration, \
+from .whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, ifilter_declaration, \
     re_filter_declaration, FileLine, get_declarations, get_file_lines, get_python_files, get_paths, \
     filter_delaration_type
 
@@ -20,6 +20,9 @@ SCRIPT_PATH: str = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestWhatprovides(unittest.TestCase):
+    def setUp(self) -> None:
+        self.test_path: str = os.path.join(os.path.dirname(SCRIPT_PATH), 'test')
+
     def test_declaration_type_init(self):
         try:
             declaration_types.append(
@@ -100,10 +103,9 @@ class TestWhatprovides(unittest.TestCase):
         self.assertEqual(declarations[2].declaration_type, declaration_types[2])
 
     def test_get_file_lines(self):
-        test_path: str = os.path.join(SCRIPT_PATH, 'test')
         file_paths: List[str] = [
-            os.path.join(test_path, 'test_data1.py'),
-            os.path.join(test_path, 'test_data2.py'),
+            os.path.join(self.test_path, 'test_data1.py'),
+            os.path.join(self.test_path, 'test_data2.py'),
         ]
         file_lines: List[FileLine] = list(
             get_file_lines(file_paths=file_paths)
@@ -114,13 +116,12 @@ class TestWhatprovides(unittest.TestCase):
         self.assertEqual(file_lines[0].line, "variable1 = 'value1'\n")
 
     def test_get_python_files(self):
-        test_path: str = os.path.join(SCRIPT_PATH, 'test')
         file_paths: List[str] = list(
-            get_python_files([test_path])
+            get_python_files([self.test_path])
         )
-        sub_folder_path: str = os.path.join(test_path, 'sub_folder')
+        sub_folder_path: str = os.path.join(self.test_path, 'sub_folder')
         sub_sub_folder_path: str = os.path.join(sub_folder_path, 'sub_sub_folder')
-        sub_folder2_path: str = os.path.join(test_path, 'sub_folder2')
+        sub_folder2_path: str = os.path.join(self.test_path, 'sub_folder2')
         sub_sub_folder2_path: str = os.path.join(sub_folder2_path, 'sub_sub_folder2')
         self.assertIn(os.path.join(sub_folder_path, 'sub_folder_item.py'), file_paths)
         self.assertIn(os.path.join(sub_sub_folder_path, 'sub_sub_folder_item.py'), file_paths)
@@ -128,11 +129,10 @@ class TestWhatprovides(unittest.TestCase):
         self.assertNotIn(os.path.join(sub_folder_path, 'not_item.txt'), file_paths)
 
     def test_get_paths(self):
-        test_path: str = os.path.join(SCRIPT_PATH, 'test')
         paths: List[str] = [
-            os.path.join(test_path, 'sub_folder'),
-            os.path.join(test_path, 'sub_folder2'),
-            os.path.join(test_path, 'not_folder.txt'),
+            os.path.join(self.test_path, 'sub_folder'),
+            os.path.join(self.test_path, 'sub_folder2'),
+            os.path.join(self.test_path, 'not_folder.txt'),
         ]
         python_paths: List[str] = list(
             get_paths(paths)

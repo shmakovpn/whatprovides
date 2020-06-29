@@ -13,25 +13,25 @@
 import os
 import sys
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DOCS_DIR = os.path.dirname(SCRIPT_DIR)
-PROJECT_DIR = os.path.dirname(DOCS_DIR)
-sys.path.insert(0, PROJECT_DIR)
-
-# mocking C modules
-# autodoc_mock_imports = []
-
-# reading version information
-VERSION: str = ''
-with open(os.path.join(PROJECT_DIR, 'version.py')) as version_file:
-    exec(version_file.read())
-
 # -- Project information -----------------------------------------------------
 
 project = 'whatprovides'
 copyright = '2020, shmakovpn'
 author = 'shmakovpn'
 
+SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
+DOCS_DIR: str = os.path.dirname(SCRIPT_DIR)
+PROJECT_DIR: str = os.path.dirname(DOCS_DIR)
+PACKAGE_DIR: str = os.path.join(PROJECT_DIR, project)
+sys.path.insert(0, PACKAGE_DIR)
+
+# mocking C modules
+# autodoc_mock_imports = []
+
+# reading version information
+VERSION: str = ''
+with open(os.path.join(PACKAGE_DIR, 'version.py')) as version_file:
+    exec(version_file.read())
 
 # -- General configuration ---------------------------------------------------
 
