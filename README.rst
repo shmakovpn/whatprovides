@@ -25,8 +25,13 @@ For example:
 
  .. code-block:: bash
 
-  python whatprovides.py ArgumentParser
+  whatprovides.py ArgumentParser
 
 Will return something like this:
 
   class: ArgumentParser: /usr/lib/python3.7/argparse.py
+
+Documentation
+-------------
+
+https://whatprovides.readthedocs.io

@@ -28,9 +28,9 @@ setup(
     install_requires=[],
     include_package_data=True,
     test_suite='whatprovides.tests',
-    python_requires='>=2.6',
+    python_requires='>=3.6',
     classifiers=[
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Environment :: Console",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
