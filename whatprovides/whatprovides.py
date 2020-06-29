@@ -205,7 +205,7 @@ def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
     """
     for file_path in file_paths:
         with open(file_path, 'r') as file:
-            line_number = 0
+            line_number: int = 0
             for line in file:
                 yield FileLine(
                     file_path=file_path,
