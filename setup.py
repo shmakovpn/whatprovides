@@ -4,15 +4,13 @@ whatprovides setup.py
 
 import os
 from setuptools import setup, find_packages
-from version import VERSION
+from whatprovides.version import VERSION
 
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
 
 with open('README.rst') as f:
     long_description: str = f.read()
-
-print('debug hello')
 
 setup(
     name='whatprovides',
@@ -23,10 +21,18 @@ setup(
     url='https://github.com/shmakovpn/whatprovides',
     download_url='https://github.com/shmakovpn/whatprovides/archive/%s.zip' % (VERSION, ),
     long_description=long_description,
+    long_description_content_type='text/x-rst',
     entry_points={
         'console_scripts': ['whatprovides=whatprovides:main'],
     },
     install_requires=[],
     include_package_data=True,
-    test_suite='tests',
+    test_suite='whatprovides.tests',
+    python_requires='>=2.6',
+    classifiers=[
+        "Programming Language :: Python :: 2",
+        "Environment :: Console",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+    ],
 )

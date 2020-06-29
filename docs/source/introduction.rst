@@ -9,7 +9,7 @@ For example:
 
  .. code-block:: bash
 
-  python whatprovides.py ArgumentParser
+  whatprovides.py ArgumentParser
 
 Will return something like this:
 

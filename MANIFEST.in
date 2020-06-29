@@ -1,10 +1,6 @@
 include LICENSE.txt
-include README.txt
 include setup.cfg
 include setup.py
-include tests.py
-include version.py
-include whatprovides.py
 include makedoc.py
 include build_package.py
 

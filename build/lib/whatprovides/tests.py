@@ -155,4 +155,3 @@ class TestWhatprovides(unittest.TestCase):
         )
         self.assertEqual(len(filtered), 1)
 
-

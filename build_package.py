@@ -9,7 +9,8 @@ SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
 def run_setup():
     os.chdir(SCRIPT_DIR)
-    os.system('python setup.py sdist')
+    os.system('python setup.py test')
+    os.system('python setup.py sdist bdist_wheel')
     print('__END__')
 
 
