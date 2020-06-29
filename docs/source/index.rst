@@ -12,8 +12,10 @@ Welcome to whatprovides's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
    installation
    examples
+   code
 
 
 Indices and tables

@@ -150,13 +150,8 @@ class TestWhatprovides(unittest.TestCase):
             Declaration(declaration_type=declaration_types[0], name='filtered', module_path=''),
             Declaration(declaration_type=declaration_types[1], name='not_filtered_123', module_path=''),
         ]
-        not_filtered: List[Declaration] = list(
-            filter_delaration_type(declarations=declarations)
-        )
-        self.assertEqual(len(not_filtered), 2)
         filtered: List[Declaration] = list(
             filter_delaration_type(declarations=declarations, remained_types=[declaration_types[1]])
         )
         self.assertEqual(len(filtered), 1)
-
 

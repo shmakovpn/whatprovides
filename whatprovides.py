@@ -5,9 +5,6 @@ This script provides search for an importing path of a module in the
 In used idea, it is a some analog of *whatprovides* command of *yum* package manager,
 but works with python modules instead of packages.
 
->>> python whatprovides StringIO
-todo Add doctest
-
 Author:
  shmakovpn <shmakovpn@yandex.ru>
 
@@ -257,22 +254,20 @@ def get_paths(paths: Iterator[str]) -> Iterator[str]:
 
 def filter_delaration_type(
         declarations: Iterator[Declaration],
-        remained_types: Optional[List[DeclarationType]] = None,
+        remained_types: List[DeclarationType] = None,
 ) -> Iterator[Declaration]:
     """
     This generator filters instances of Declaration by a list of declaration types
 
     :param declarations: an iterable of Declarations to filter
     :type declarations: Iterator[Declarations]
-    :param remained_types: only declarations of type from this list will remain. None - no filtering (default).
-    :type remained_types: Optional[List[DeclarationType]]
+    :param remained_types: only declarations of type from this list will remain.
+    :type remained_types: List[DeclarationType]
     :return: filtered declarations
     :rtype: Iterator[Declarations]
     """
     for declaration in declarations:
-        if not remained_types:
-            yield declaration
-        elif declaration.declaration_type in remained_types:
+        if declaration.declaration_type in remained_types:
             yield declaration
 
 
@@ -288,7 +283,6 @@ if __name__ == '__main__':
     parser.add_argument('-d', help='show only functions, this option can be combined with the -v or -c options',
                         action='store_true')
     args: argparse.Namespace = parser.parse_args()
-    print(f"args={args}")
     if args.r and args.i:
         _filter: partial = partial(re_filter_declaration, re.compile(args.search, re.IGNORECASE))
     elif args.r:
