@@ -1,7 +1,7 @@
 Whatprovides
 ============
 
-|docs| |license|
+|docs| |license| |pypi|
 
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
     :alt: Documentation Status
@@ -12,6 +12,11 @@ Whatprovides
     :alt: License
     :scale: 100%
     :target: https://opensource.org/licenses/Apache-2.0
+
+.. |pypi| image:: https://badge.fury.io/py/whatprovides.svg
+    :alt: PyPI
+    :target: https://badge.fury.io/py/whatprovides
+    :scale: 100%
 
 
 **whatprovides** is a package that allows you to search for python modules that contain declared classes,
