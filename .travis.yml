@@ -4,4 +4,4 @@ python:
   - '3.6'
   - '3.7'
   - '3.8'
-script: pytest tests.py
+script: pytest whatprovides/tests.py
