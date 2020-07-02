@@ -204,15 +204,25 @@ def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
     :rtype: Iterator[FileLine]
     """
     for file_path in file_paths:
-        with open(file_path, 'r') as file:
-            line_number: int = 0
-            for line in file:
-                yield FileLine(
-                    file_path=file_path,
-                    line_number=line_number,
-                    line=line,
-                )
-                line_number += 1
+        line_number: int = 0
+        try:
+            with open(file_path, 'r') as file:  # try to read a file using default encoding
+                for line in file:
+                    yield FileLine(
+                        file_path=file_path,
+                        line_number=line_number,
+                        line=line,
+                    )
+                    line_number += 1
+        except UnicodeDecodeError as unicode_decode_error:
+            with open(file_path, 'r', encoding='utf-8') as file:  # read file using utf-8 encoding
+                for line in file:
+                    yield FileLine(
+                        file_path=file_path,
+                        line_number=line_number,
+                        line=line,
+                    )
+                    line_number += 1
 
 
 def get_python_files(search_paths: Iterator[str]) -> Iterator[str]:
@@ -254,7 +264,7 @@ def get_paths(paths: Iterator[str]) -> Iterator[str]:
 
 def filter_delaration_type(
         declarations: Iterator[Declaration],
-        remained_types: List[DeclarationType] = None,
+        remained_types: List[DeclarationType],
 ) -> Iterator[Declaration]:
     """
     This generator filters instances of Declaration by a list of declaration types

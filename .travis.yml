@@ -1,11 +1,22 @@
 language: python
 sudo: false
-python:
-  - '3.6'
-  - '3.7'
-  - '3.8'
+jobs:
+  include:
+    - name: "Python on Linux"
+      python:
+        - '3.6'
+        - '3.7'
+        - '3.8'
+    - name: "Python 3.8.0 on Windows"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.8.0
+        - python -m pip install --upgrade pip
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 install:
   - pip install codecov
-script: coverage run whatprovides/tests.py
+  - pip install pytest-cov
+script: coverage run -m pytest whatprovides/tests.py
 after_success:
   - codecov

@@ -8,15 +8,17 @@ Date:
  2020-06-21
 """
 import os
+import sys
 import re
 import unittest
 from typing import Pattern, List
-from .whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, ifilter_declaration, \
-    re_filter_declaration, FileLine, get_declarations, get_file_lines, get_python_files, get_paths, \
-    filter_delaration_type
+from .whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, \
+    ifilter_declaration, re_filter_declaration, FileLine, get_declarations, get_file_lines, get_python_files, \
+    get_paths, filter_delaration_type
 
 
 SCRIPT_PATH: str = os.path.dirname(os.path.abspath(__file__))
+TEST_STRING_IO: bool = False
 
 
 class TestWhatprovides(unittest.TestCase):
@@ -106,11 +108,12 @@ class TestWhatprovides(unittest.TestCase):
         file_paths: List[str] = [
             os.path.join(self.test_path, 'test_data1.py'),
             os.path.join(self.test_path, 'test_data2.py'),
+            os.path.join(self.test_path, 'ja.py')
         ]
         file_lines: List[FileLine] = list(
             get_file_lines(file_paths=file_paths)
         )
-        self.assertEqual(len(file_lines), 7)
+        self.assertEqual(len(file_lines), 68)
         self.assertEqual(file_lines[0].line_number, 0)
         self.assertEqual(file_lines[0].file_path, file_paths[0])
         self.assertEqual(file_lines[0].line, "variable1 = 'value1'\n")
@@ -155,4 +158,12 @@ class TestWhatprovides(unittest.TestCase):
         )
         self.assertEqual(len(filtered), 1)
 
+    def test_string_io(self):
+        if TEST_STRING_IO:
+            results = re_filter_declaration(
+                re.compile('^StringIO$'),
+                get_declarations(get_file_lines(get_python_files(get_paths(sys.path))))
+            )
+            class_results = filter_delaration_type(results, [declaration_types[2]])
+            self.assertTrue(any(class_results))
 

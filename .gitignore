@@ -14,6 +14,7 @@ notes
 
 # setuptools
 dist/
+build/
 __pycache__/
 *.egg-info/
 .eggs/
@@ -33,3 +34,5 @@ templates/
 # deployment files
 uwsgi.ini
 
+# coverage
+.coverage

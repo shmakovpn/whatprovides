@@ -7,9 +7,9 @@ include build_package.py
 recursive-include test *
 recursive-include docs *
 
-recursive-exclude docs/build/ *
+recursive-exclude docs/build *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-recursive-exclude .git/ *
-recursive-exclude .idea/ *
-recursive-exclude venv/ *
+recursive-exclude .git *
+recursive-exclude .idea *
+recursive-exclude venv *
