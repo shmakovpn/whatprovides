@@ -1,7 +1,7 @@
 Whatprovides
 ============
 
-|docs| |license| |pypi|
+|docs| |license| |pypi| |build|
 
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
     :alt: Documentation Status
@@ -16,6 +16,11 @@ Whatprovides
 .. |pypi| image:: https://badge.fury.io/py/whatprovides.svg
     :alt: PyPI
     :target: https://badge.fury.io/py/whatprovides
+    :scale: 100%
+
+.. |build| image:: https://travis-ci.org/shmakovpn/whatprovides.svg?branch=master
+    :alt: travis-ci
+    :target: https://travis-ci.org/shmakovpn/whatprovides
     :scale: 100%
 
 
