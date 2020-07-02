@@ -4,4 +4,8 @@ python:
   - '3.6'
   - '3.7'
   - '3.8'
-script: pytest whatprovides/tests.py
+install:
+  - pip install codecov
+script: coverage run whatprovides/tests.py
+after_success:
+  - codecov
