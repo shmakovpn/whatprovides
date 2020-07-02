@@ -1,7 +1,7 @@
 Whatprovides
 ============
 
-|docs| |license| |pypi| |build|
+|docs| |license| |pypi| |build| |codecov|
 
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
     :alt: Documentation Status
@@ -23,6 +23,10 @@ Whatprovides
     :target: https://travis-ci.org/shmakovpn/whatprovides
     :scale: 100%
 
+.. |codecov| image:: https://codecov.io/gh/shmakovpn/whatprovides/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/shmakovpn/whatprovides
+    :alt: codecov
+    :scale: 100%
 
 **whatprovides** is a package that allows you to search for python modules that contain declared classes,
 functions and variables by the name of the search object.
