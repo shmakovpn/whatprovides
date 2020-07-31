@@ -13,7 +13,7 @@ import re
 import unittest
 from typing import Pattern, List
 from .whatprovides import DeclarationType, declaration_types, Declaration, filter_declaration, \
-    ifilter_declaration, re_filter_declaration, FileLine, get_declarations, get_file_lines, get_python_files, \
+    ifilter_declaration, re_filter_declaration, FileLine, get_declarations, get_files_lines, get_python_files, \
     get_paths, filter_delaration_type
 
 
@@ -106,14 +106,14 @@ class TestWhatprovides(unittest.TestCase):
         self.assertEqual(declarations[2].name, 'SomeClass')
         self.assertEqual(declarations[2].declaration_type, declaration_types[2])
 
-    def test_get_file_lines(self):
+    def test_get_files_lines(self):
         file_paths: List[str] = [
             os.path.join(self.test_path, 'test_data1.py'),
             os.path.join(self.test_path, 'test_data2.py'),
             os.path.join(self.test_path, 'ja.py')
         ]
         file_lines: List[FileLine] = list(
-            get_file_lines(file_paths=file_paths)
+            get_files_lines(file_paths=file_paths)
         )
         self.assertEqual(len(file_lines), 68)
         self.assertEqual(file_lines[0].line_number, 0)
@@ -164,7 +164,7 @@ class TestWhatprovides(unittest.TestCase):
         if TEST_STRING_IO:
             results = re_filter_declaration(
                 re.compile('^StringIO$'),
-                get_declarations(get_file_lines(get_python_files(get_paths(sys.path))))
+                get_declarations(get_files_lines(get_python_files(get_paths(sys.path))))
             )
             class_results = filter_delaration_type(results, [declaration_types[2]])
             self.assertTrue(any(class_results))

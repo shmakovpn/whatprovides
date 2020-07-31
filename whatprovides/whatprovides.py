@@ -15,7 +15,7 @@ import os
 import sys
 import re
 import argparse
-from chardet.universaldetector import UniversalDetector
+import chardet
 from typing import List, Pattern, Match, Iterator
 from functools import partial
 
@@ -169,7 +169,7 @@ class FileLine:
         self.line: str = line
 
     def __str__(self):
-        return '%i: %s: %s' % (self.line_number, self.file_path, self.line())
+        return '%i: %s: %s' % (self.line_number, self.file_path, self.line.rstrip())
 
 
 def get_declarations(lines: Iterator[FileLine]) -> Iterator[Declaration]:
@@ -194,9 +194,31 @@ def get_declarations(lines: Iterator[FileLine]) -> Iterator[Declaration]:
                 break
 
 
-def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
+def get_file_lines(file_path: str, encoding: str) -> Iterator[FileLine]:
     """
     This generator creates instances of a line of a file
+
+    :param file_path: A path to a file
+    :type file_path: str
+    :param encoding: An encoding of a file
+    :type encoding: str
+    :return: a generator of instances of lines of a file
+    :rtype: Iterator[FileLine]
+    """
+    line_number: int = 0
+    with open(file_path, encoding=encoding) as f:
+        for line in f:
+            yield FileLine(
+                file_path=file_path,
+                line_number=line_number,
+                line=line,
+            )
+            line_number += 1
+
+
+def get_files_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
+    """
+    This generator creates instances of a line of file
     from paths to files
 
     :param file_paths: An iterable of file paths
@@ -206,21 +228,31 @@ def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
     """
     for file_path in file_paths:
         line_number: int = 0
+        try:
+            yield from get_file_lines(file_path, 'utf-8')
+            continue  # goto a next file
+        except UnicodeDecodeError as e:
+            pass
+        try:
+            yield from get_file_lines(file_path, 'ascii')
+            continue
+        except UnicodeDecodeError as e:
+            pass
+        # try to detect an encoding of the file
         with open(file_path, 'rb') as raw_file:
-            detector: UniversalDetector = UniversalDetector()
-            for line in raw_file:
-                detector.feed(line)
-                if detector.done:
-                    break
-            with open(file_path, 'r', encoding=detector.result.get('encoding') or sys.getdefaultencoding()) as file:
-                for line in file:
-                    yield FileLine(
-                        file_path=file_path,
-                        line_number=line_number,
-                        line=line,
-                    )
-                    line_number += 1
-            detector.reset()
+            encoding: str = chardet.detect(raw_file.read())['encoding']
+            if encoding and encoding!='utf-8' and encoding!='ascii':
+                try:
+                    yield from get_file_lines(file_path, encoding)
+                    continue
+                except UnicodeDecodeError as e:
+                    pass
+            if encoding.startswith('ISO-8859') and encoding!='ISO-8859-1':
+                try:
+                    yield from get_file_lines(file_path, 'ISO-8859-1')
+                except UnicodeDecodeError as e:
+                    print(f"'{file_path}', {encoding} raised encoding exception")
+                    # skip this file
 
 
 def get_python_files(search_paths: Iterator[str]) -> Iterator[str]:
@@ -301,7 +333,7 @@ def main():
         _filter: partial = partial(filter_declaration, args.search)
     results: Iterator[Declaration] = _filter(
         declarations=get_declarations(
-            lines=get_file_lines(
+            lines=get_files_lines(
                 file_paths=get_python_files(
                     search_paths=get_paths(sys.path)
                 )
