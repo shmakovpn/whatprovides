@@ -206,17 +206,21 @@ def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
     """
     for file_path in file_paths:
         line_number: int = 0
-        with open(file_path, 'rb') as file:
-            for line in file:
-                detector: UniversalDetector = UniversalDetector()
+        with open(file_path, 'rb') as raw_file:
+            detector: UniversalDetector = UniversalDetector()
+            for line in raw_file:
                 detector.feed(line)
-                yield FileLine(
-                    file_path=file_path,
-                    line_number=line_number,
-                    line=line.decode(detector.result.get('encoding') or sys.getdefaultencoding()).rstrip(),
-                )
-                detector.reset()
-                line_number += 1
+                if detector.done:
+                    break
+            with open(file_path, 'r', encoding=detector.result.get('encoding') or sys.getdefaultencoding()) as file:
+                for line in file:
+                    yield FileLine(
+                        file_path=file_path,
+                        line_number=line_number,
+                        line=line,
+                    )
+                    line_number += 1
+            detector.reset()
 
 
 def get_python_files(search_paths: Iterator[str]) -> Iterator[str]:
