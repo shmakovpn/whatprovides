@@ -16,6 +16,7 @@ jobs:
         - python -m pip install --upgrade pip
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 install:
+  - pip install -r requirements.txt
   - pip install codecov
   - pip install pytest-cov
 script: coverage run -m pytest whatprovides/tests.py

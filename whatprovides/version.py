@@ -1,4 +1,4 @@
 """
-whatprovides verstion.py
+whatprovides version.py
 """
-VERSION: str = '1.1'  #: current version of **whatprovides**
+VERSION: str = '1.2'  #: current version of **whatprovides**

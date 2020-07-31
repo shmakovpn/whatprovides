@@ -35,7 +35,9 @@ class TestWhatprovides(unittest.TestCase):
             )
             self.assertTrue(False, f"Checking for wrong pattern failed")
         except RuntimeError as e:
-            print(f"Checker for wrong pattern works! '{e}' was caught")
+            pass
+        else:
+            self.assertTrue(False, f"Checker for wrong pattern doe not work! '{e}' was not caught")
         line_var: str = 'some_var = "some value"'
         self.assertEqual(declaration_types[0].search(line=line_var), 'some_var')
 

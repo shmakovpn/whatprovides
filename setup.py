@@ -25,7 +25,9 @@ setup(
     entry_points={
         'console_scripts': ['whatprovides=whatprovides:main'],
     },
-    install_requires=[],
+    install_requires=[
+        'chardet',
+    ],
     include_package_data=True,
     test_suite='whatprovides.tests',
     python_requires='>=3.6',
