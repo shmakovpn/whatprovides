@@ -169,7 +169,7 @@ class FileLine:
         self.line: str = line
 
     def __str__(self):
-        return '%i: %s: %s' % (self.line_number, self.file_path, self.line.rstrip())
+        return '%i: %s: %s' % (self.line_number, self.file_path, self.line())
 
 
 def get_declarations(lines: Iterator[FileLine]) -> Iterator[Declaration]:
@@ -213,28 +213,10 @@ def get_file_lines(file_paths: Iterator[str]) -> Iterator[FileLine]:
                 yield FileLine(
                     file_path=file_path,
                     line_number=line_number,
-                    line=line.decode(detector.result.get('encoding') or sys.getdefaultencoding()),
+                    line=line.decode(detector.result.get('encoding') or sys.getdefaultencoding()).rstrip(),
                 )
                 detector.reset()
                 line_number += 1
-        # try:
-        #     with open(file_path, 'r') as file:  # try to read a file using default encoding
-        #         for line in file:
-        #             yield FileLine(
-        #                 file_path=file_path,
-        #                 line_number=line_number,
-        #                 line=line,
-        #             )
-        #             line_number += 1
-        # except UnicodeDecodeError as unicode_decode_error:
-        #     with open(file_path, 'r', encoding='utf-8') as file:  # read file using utf-8 encoding
-        #         for line in file:
-        #             yield FileLine(
-        #                 file_path=file_path,
-        #                 line_number=line_number,
-        #                 line=line,
-        #             )
-        #             line_number += 1
 
 
 def get_python_files(search_paths: Iterator[str]) -> Iterator[str]:
